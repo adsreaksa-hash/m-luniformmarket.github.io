@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M&L UNIFORM MARKET</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- THEME CONFIG --- */
+        :root {
+            --primary: #00c853;       
+            --primary-light: #e8f5e9; 
+            --bg-body: #ffffff;       
+            --bg-white: #ffffff;      
+            --text-main: #2c3e50;     
+            --text-muted: #95a5a6;    
+            --border: #e0e0e0;        
+            --shadow: 0 5px 25px rgba(0,0,0,0.08);
+            --red: #e74c3c;
+            --badge-hot: #ff3d00;
+            --badge-new: #00c853;
+            --badge-sale: #ffab00;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', 'Kantumruy Pro', sans-serif; scroll-behavior: smooth; }
+        
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+        .white-panel { background: var(--bg-white); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 15px; }
+
+        /* Buttons */
+        .btn { padding: 10px 25px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 12px; outline: none; }
+        .btn-green { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3); }
+        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 200, 83, 0.4); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); font-weight: 700; text-decoration: none; display: inline-block; }
+        .btn-outline:hover { background: var(--primary); color: white; }
+
+        /* --- NAVBAR & SEARCH --- */
+        #view-shop { height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .navbar { padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-radius: 0 0 20px 20px; gap: 20px; }
+        
+        .logo-container { display: flex; align-items: center; cursor: pointer; user-select: none; min-width: 200px; }
+        .logo-img { height: 50px; margin-right: 15px; object-fit: contain; }
+        
+        /* 🔥 LOGO TEXT STYLE UPDATED */
+        .logo-text { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); display: flex; align-items: center; }
+        .logo-stack { display: flex; flex-direction: column; margin-left: 6px; line-height: 1; }
+        .logo-uniform { color: var(--primary); }
+        .logo-market { font-size: 9px; letter-spacing: 3.5px; color: var(--text-muted); font-weight: 700; margin-top: 2px; }
+
+        /* Search Bar Style */
+        .search-box { flex: 1; max-width: 400px; position: relative; }
+        .search-inp { width: 100%; padding: 10px 40px 10px 20px; border-radius: 30px; border: 2px solid var(--border); outline: none; background: #f9f9f9; transition: 0.3s; }
+        .search-inp:focus { border-color: var(--primary); background: white; }
+        .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        
+        .nav-links { display: flex; gap: 10px; }
+        .nav-links a { 
+            text-decoration: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.3s;
+            padding: 8px 20px; border-radius: 25px; border: 2px solid var(--primary); color: var(--primary); background: white; text-transform: uppercase; white-space: nowrap;
+        }
+        .nav-links a:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 200, 83, 0.2); }
+
+        /* Hero */
+        .hero { text-align: center; padding: 60px 20px; background: linear-gradient(180deg, var(--bg-white) 0%, #f4f4f4 100%); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hero h1 { font-size: 45px; text-transform: uppercase; margin-bottom: 10px; color: var(--text-main); opacity: 0; animation: fadeInUp 1s ease-out forwards; }
+        .hero p { color: var(--primary); letter-spacing: 4px; font-weight: 700; opacity: 0; animation: fadeInUp 1s ease-out 0.3s forwards; }
+
+        /* Story */
+        .story-container { display: flex; flex-wrap: wrap; align-items: center; max-width: 1200px; margin: 20px auto 60px auto; padding: 50px; gap: 40px; }
+        .story-content, .story-image { flex: 1; min-width: 300px; opacity: 0; transform: scale(0.8) translateY(50px); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .animate-active .story-content { opacity: 1; transform: scale(1) translateY(0); }
+        .animate-active .story-image { opacity: 1; transform: scale(1) translateY(0); transition-delay: 0.2s; }
+        .story-image img { width: 100%; border-radius: 20px; box-shadow: var(--shadow); transition: 0.3s; }
+        .story-image img:hover { transform: scale(1.02); }
+        @keyframes floatImage { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+        .animate-active .story-image img { animation: floatImage 4s ease-in-out infinite; animation-delay: 1.2s; }
+        .stat-box { display: flex; gap: 30px; margin-top: 20px; }
+        .stat-item h3 { font-size: 28px; color: var(--primary); font-weight: 800; margin: 0; }
+        .stat-item p { font-size: 12px; color: var(--text-muted); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Grid & Products */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; padding: 0 20px 80px 20px; }
+        .product-card { border-radius: 15px; padding: 20px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; border: 1px solid transparent; animation: fadeIn 0.5s; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .product-card:hover { transform: translateY(-12px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0, 200, 83, 0.15); }
+        
+        .p-img-box { height: 220px; display: flex; align-items: center; justify-content: center; background: #f0f2f5; border-radius: 10px; margin-bottom: 15px; cursor: pointer; overflow: hidden; position: relative; }
+        .p-img-box img { width: 80%; height: auto; transition: 0.5s ease; mix-blend-mode: multiply; }
+        .product-card:hover .p-img-box img { transform: scale(1.15) rotate(3deg); }
+        
+        .hover-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.05); display: flex; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; }
+        .hover-icon { width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateY(20px) scale(0.5); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .product-card:hover .hover-overlay { opacity: 1; }
+        .product-card:hover .hover-icon { transform: translateY(0) scale(1); }
+
+        .badge { position: absolute; top: 15px; left: 15px; padding: 5px 12px; border-radius: 20px; color: white; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 3px 10px rgba(0,0,0,0.2); z-index: 10; }
+        .badge-hot { background: var(--badge-hot); }
+        .badge-new { background: var(--badge-new); }
+        .badge-sale { background: var(--badge-sale); color: black; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast & Cart */
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10001; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: #333; color: white; padding: 12px 25px; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast i { color: var(--primary); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        .cart-float-btn { position: fixed; bottom: 30px; right: 30px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 10px 30px rgba(0, 200, 83, 0.4); cursor: pointer; z-index: 999; transition: 0.3s; }
+        .cart-float-btn:hover { transform: scale(1.1); }
+        .cart-float-btn span { position: absolute; top: 0; right: 0; background: var(--red); font-size: 12px; width: 22px; height: 22px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-weight: 700; border: 2px solid white; }
+        .cart-sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: white; z-index: 10000; box-shadow: -5px 0 30px rgba(0,0,0,0.1); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .cart-items-container { flex: 1; overflow-y: auto; padding: 20px; }
+        .cart-footer { padding: 20px; border-top: 1px solid var(--border); background: #f9f9f9; }
+        .cart-item { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .cart-item img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        .cart-info h4 { font-size: 14px; margin-bottom: 5px; }
+        .cart-info p { font-size: 12px; color: var(--primary); font-weight: 700; }
+        .remove-btn { color: var(--red); font-size: 14px; cursor: pointer; margin-left: auto; padding: 5px; }
+
+        /* Footer & Others */
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .lightbox img { max-height: 80vh; max-width: 90vw; border-radius: 10px; animation: zoomIn 0.3s; }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
+        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .footer-section { background: var(--bg-white); border-top: 1px solid var(--border); margin-top: auto; padding: 50px 20px 20px 20px; }
+        .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        .contact-info h3 { color: var(--text-main); margin-bottom: 20px; font-size: 20px; font-weight: 800; text-transform: uppercase; }
+        .contact-row { display: flex; align-items: center; margin-bottom: 15px; color: var(--text-muted); font-size: 14px; }
+        .contact-row i { color: var(--primary); width: 30px; font-size: 18px; }
+        .contact-row span { font-weight: 600; color: var(--text-main); }
+        .map-box { width: 100%; height: 250px; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); border: 2px solid var(--border); }
+        .map-box iframe { width: 100%; height: 100%; border: 0; }
+        .admin-link-footer { cursor: pointer; color: #ddd; font-size: 11px; text-decoration: none; transition: 0.3s; }
+        .admin-link-footer:hover { color: var(--primary); }
+
+        /* Admin */
+        #view-login, #view-admin { height: 100vh; background: var(--bg-body); }
+        #view-login { display: flex; justify-content: center; align-items: center; }
+        .login-box { width: 400px; padding: 50px; text-align: center; }
+        .inp-field { width: 100%; padding: 12px; background: var(--bg-body); border: 2px solid var(--border); border-radius: 10px; color: var(--text-main); outline: none; margin-top: 5px; margin-bottom: 15px; font-weight: 500; }
+        .inp-field:focus { border-color: var(--primary); background: var(--bg-white); }
+        #view-admin { display: flex; }
+        .sidebar { width: 280px; display: flex; flex-direction: column; border-right: 1px solid var(--border); border-radius: 0; }
+        .sidebar-brand { padding: 30px; font-size: 22px; font-weight: 800; color: var(--text-main); border-bottom: 1px solid var(--border); text-align: center; }
+        .menu-item { padding: 18px 30px; cursor: pointer; color: var(--text-muted); display: flex; font-weight: 600; justify-content: space-between; transition: 0.3s; border-left: 4px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 15px; }
+        th { text-align: left; color: var(--text-muted); padding: 10px 20px; font-size: 13px; text-transform: uppercase; }
+        td { background: var(--bg-white); padding: 20px; color: var(--text-main); font-weight: 500; box-shadow: var(--shadow); }
+        tr td:first-child { border-radius: 15px 0 0 15px; }
+        tr td:last-child { border-radius: 0 15px 15px 0; }
+        .t-img { width: 50px; height: 50px; border-radius: 10px; object-fit: contain; background: var(--bg-body); border: 1px solid var(--border); padding: 5px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-box { width: 500px; padding: 40px; position: relative; border: none; }
+        .upload-area { border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="view-shop" onscroll="checkScroll()">
+        <nav class="navbar white-panel">
+            <div class="logo-container" onclick="filterShop('all')">
+                <img src="" id="shop-logo" alt="Logo" class="logo-img">
+                
+                <div class="logo-text">
+                    M&L 
+                    <div class="logo-stack">
+                        <span class="logo-uniform">UNIFORM</span>
+                        <span class="logo-market">MARKET</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="search-box">
+                <input type="text" class="search-inp" placeholder="Search products..." onkeyup="searchShop(this.value)">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <div class="nav-links">
+                <a onclick="filterShop('fashion')">Fashion</a>
+                <a onclick="filterShop('uniform')">Uniform</a>
+                <a onclick="scrollToStory()">About</a> 
+            </div>
+        </nav>
+
+        <div class="hero">
+            <h1 id="hero-title">Premium Collection</h1>
+            <p>QUALITY UNIFORMS & FASHION</p>
+        </div>
+
+        <div id="our-story" class="story-container white-panel">
+            <div class="story-content">
+                <h4 style="color:var(--primary); letter-spacing:2px; font-weight:700; text-transform:uppercase;">Who We Are</h4>
+                <h2 id="disp-story-title" style="font-size:35px; margin:15px 0; color:var(--text-main); line-height:1.2;">M&L STORY</h2>
+                <p id="disp-story-desc" style="color:var(--text-muted); line-height:1.8; margin-bottom:25px;">...</p>
+                <div class="stat-box">
+                    <div class="stat-item"><h3>5K+</h3><p>Customers</p></div>
+                    <div class="stat-item"><h3>100+</h3><p>Partners</p></div>
+                    <div class="stat-item"><h3>24/7</h3><p>Support</p></div>
+                </div>
+            </div>
+            <div class="story-image"><img id="disp-story-img" src="" alt="Our Story"></div>
+        </div>
+
+        <div class="grid-container" id="shop-container"></div>
+        
+        <footer id="footer-contact" class="footer-section">
+            <div class="footer-grid">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="contact-row"><i class="fas fa-map-marker-alt"></i><span>Phnom Penh, Cambodia</span></div>
+                    <div class="contact-row"><i class="fas fa-phone-alt"></i><span style="font-size: 16px; color: var(--primary);">015 812 050 | 068 566 402</span></div>
+                    <div style="margin-top: 25px;">
+                        <a href="https://t.me/ReaksaAds" target="_blank" class="btn btn-outline" style="display: flex; align-items: center; justify-content: center; width: fit-content; gap: 10px;">
+                            <i class="fab fa-telegram-plane" style="width: auto;"></i> Chat on Telegram
+                        </a>
+                    </div>
+                </div>
+                <div class="map-box">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d250151.15121013444!2d104.75010214299723!3d11.57966693351912!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3109513dc76a6be3%3A0x9c010ee85ab525cb!2sPhnom%20Penh!5e0!3m2!1sen!2skh!4v1700000000000!5m2!1sen!2skh" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 5px;">© 2026 M&L UNIFORM MARKET. All rights reserved.</p>
+                <span class="admin-link-footer" onclick="switchView('view-login')">Staff Login</span>
+            </div>
+        </footer>
+
+        <div class="cart-float-btn" onclick="toggleCart()">
+            <i class="fas fa-shopping-bag"></i><span id="cart-count">0</span>
+        </div>
+        <div id="toast-container"></div>
+
+        <div id="cart-sidebar" class="cart-sidebar">
+            <div class="cart-header"><h2>Your Bag</h2><span onclick="toggleCart()" style="cursor:pointer; font-size:24px;">×</span></div>
+            <div id="cart-items" class="cart-items-container"></div>
+            <div class="cart-footer">
+                <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:15px; font-size:18px;"><span>Total:</span><span id="cart-total">$0.00</span></div>
+                <button class="btn btn-green" style="width:100%; padding:15px;" onclick="checkoutTelegram()">CHECKOUT VIA TELEGRAM</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()"><span class="lightbox-close">×</span><img id="lightbox-img" src=""></div>
+
+    <div id="view-login" class="hidden">
+        <div class="login-box white-panel">
+            <h2 style="margin-bottom: 30px;">ADMIN <span style="color:var(--primary)">PANEL</span></h2>
+            <input type="text" id="u" class="inp-field" placeholder="Username">
+            <input type="password" id="p" class="inp-field" placeholder="Password">
+            <button class="btn btn-green" style="width: 100%;" onclick="doLogin()">LOGIN</button>
+            <p style="margin-top: 20px; font-size: 14px; cursor: pointer;" onclick="switchView('view-shop')">← Back to Shop</p>
+        </div>
+    </div>
+
+    <div id="view-admin" class="hidden">
+        <aside class="sidebar white-panel">
+            <div class="sidebar-brand">M&L <span style="color:var(--primary)">ADMIN</span></div>
+            <div style="margin-top: 20px;">
+                <div class="menu-item active" onclick="switchTab('fashion', this)"><span>Fashion</span><i class="fas fa-tshirt"></i></div>
+                <div class="menu-item" onclick="switchTab('uniform', this)"><span>Uniform</span><i class="fas fa-user-shield"></i></div>
+                <div class="menu-item" onclick="switchTab('story', this)"><span>Our Story</span><i class="fas fa-book-open"></i></div>
+                <div class="menu-item" onclick="switchTab('settings', this)"><span>Settings</span><i class="fas fa-cog"></i></div>
+            </div>
+            <div style="margin-top: auto; padding: 30px;"><button class="btn btn-outline" style="width: 100%; border-color: #e74c3c; color: #e74c3c;" onclick="logout()">LOGOUT</button></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="stat-header"><h2 id="page-title" style="color: var(--text-main); font-weight: 800;">Fashion Management</h2></div>
+            <div id="tab-fashion"><button class="btn btn-green" onclick="openModal('fashion')">+ ADD NEW FASHION</button><br><br><table><thead><tr><th>IMG</th><th>NAME</th><th>PRICE</th><th>BADGE</th><th>ACTION</th></tr></thead><tbody id="fashion-table-body"></tbody></table></div>
+            <div id="tab-uniform" class="hidden"><button class="btn btn-green" onclick="openModal('uniform')">+ ADD NEW UNIFORM</button><br><br><table><thead><tr><th>IMG</th><th>NAME</th><th>TYPE</th><th>BADGE</th><th>ACTION</th></tr></thead><tbody id="uniform-table-body"></tbody></table></div>
+            <div id="tab-story" class="hidden"><div class="white-panel" style="padding:40px;max-width:600px;"><label style="font-weight:700;font-size:12px;">TITLE</label><input type="text" id="story-title-inp" class="inp-field"><label style="font-weight:700;font-size:12px;">DESCRIPTION</label><textarea id="story-desc-inp" class="inp-field" style="height:120px;"></textarea><label style="font-weight:700;font-size:12px;">IMAGE URL</label><input type="text" id="story-img-inp" class="inp-field"><button class="btn btn-green" style="width:100%;margin-top:10px;" onclick="saveStory()">UPDATE STORY</button></div></div>
+            <div id="tab-settings" class="hidden">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="white-panel" style="padding: 40px; flex: 1; min-width: 300px;"><h3>Change Logo</h3><div class="upload-area" onclick="document.getElementById('logo-file').click()"><i class="fas fa-cloud-upload-alt fa-2x" style="color: var(--primary);"></i><p>Click to Upload</p><input type="file" id="logo-file" hidden onchange="handleLogoUpload(this)"></div><img id="admin-logo-preview" src="" style="height: 60px; margin-top: 10px;"></div>
+                    <div class="white-panel" style="padding: 40px; flex: 1; min-width: 300px;"><h3>Admin Account</h3><label style="font-size:12px; font-weight:700;">NEW USERNAME</label><input type="text" id="new-user-inp" class="inp-field"><label style="font-size:12px; font-weight:700;">NEW PASSWORD</label><input type="text" id="new-password-inp" class="inp-field"><button class="btn btn-green" style="width: 100%;" onclick="updateCredentials()">UPDATE</button></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-box" class="modal-overlay hidden">
+        <div class="modal-box white-panel">
+            <h2 id="modal-title" style="color:var(--text-main); margin-bottom: 20px;">ADD ITEM</h2>
+            <input type="hidden" id="edit-mode"><input type="hidden" id="edit-id"><input type="hidden" id="current-tab">
+            <label style="font-size:12px; font-weight:700;">NAME</label><input type="text" id="modal-name" class="inp-field">
+            <label style="font-size:12px; font-weight:700;">PRICE/TYPE</label><input type="text" id="modal-price" class="inp-field">
+            <label style="font-size:12px; font-weight:700;">IMAGE URL</label><input type="text" id="modal-img" class="inp-field">
+            <label style="font-size:12px; font-weight:700;">BADGE (OPTIONAL)</label>
+            <select id="modal-badge" class="inp-field"><option value="">None</option><option value="HOT">HOT</option><option value="NEW">NEW</option><option value="SALE">SALE</option></select>
+            <button class="btn btn-green" style="width:100%;" onclick="saveItem()">SAVE</button>
+            <button class="btn btn-outline" style="width:100%; margin-top:10px; border-color:var(--border); color:var(--text-muted);" onclick="closeModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            fashion: JSON.parse(localStorage.getItem('ml_fashion')) || [{ id: 1, name: 'Cyber Jacket', price: '$45.00', img: 'https://cdn-icons-png.flaticon.com/512/2806/2806141.png', badge: 'HOT' }],
+            uniform: JSON.parse(localStorage.getItem('ml_uniform')) || [{ id: 101, name: 'Security Set', type: 'Full Body', img: 'https://cdn-icons-png.flaticon.com/512/2405/2405904.png', badge: 'NEW' }],
+            logo: localStorage.getItem('ml_logo') || 'https://cdn-icons-png.flaticon.com/512/732/732200.png',
+            story: JSON.parse(localStorage.getItem('ml_story')) || { title: "M&L UNIFORM STORY", desc: "ចាប់ផ្តើមពីហាងតូចមួយក្នុងឆ្នាំ ២០២០...", img: "https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg" },
+            username: localStorage.getItem('ml_username') || 'admin',
+            password: localStorage.getItem('ml_password') || '123'
+        };
+        let cart = [];
+
+        document.addEventListener('keydown', function(event) { if (event.key === "F9") switchView('view-login'); });
+        window.onload = () => { renderData(); checkScroll(); updateCartUI(); };
+
+        function saveDB() {
+            localStorage.setItem('ml_fashion', JSON.stringify(db.fashion)); localStorage.setItem('ml_uniform', JSON.stringify(db.uniform));
+            localStorage.setItem('ml_logo', db.logo); localStorage.setItem('ml_story', JSON.stringify(db.story));
+            localStorage.setItem('ml_username', db.username); localStorage.setItem('ml_password', db.password);
+            renderData();
+        }
+
+        function renderData() {
+            document.getElementById('shop-logo').src = db.logo; document.getElementById('admin-logo-preview').src = db.logo;
+            document.getElementById('disp-story-title').innerText = db.story.title; document.getElementById('disp-story-desc').innerText = db.story.desc; document.getElementById('disp-story-img').src = db.story.img;
+            document.getElementById('story-title-inp').value = db.story.title; document.getElementById('story-desc-inp').value = db.story.desc; document.getElementById('story-img-inp').value = db.story.img;
+            document.getElementById('new-user-inp').value = db.username;
+            
+            const fBody = document.getElementById('fashion-table-body'); fBody.innerHTML = '';
+            db.fashion.forEach(i => fBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.price || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('fashion', ${i.id})">EDIT</button></td></tr>`);
+            
+            const uBody = document.getElementById('uniform-table-body'); uBody.innerHTML = '';
+            db.uniform.forEach(i => uBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.type || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('uniform', ${i.id})">EDIT</button></td></tr>`);
+            
+            filterShop('all');
+        }
+
+        function getBadgeColor(b) { if(b=='HOT') return 'var(--badge-hot)'; if(b=='NEW') return 'var(--badge-new)'; if(b=='SALE') return 'var(--badge-sale)'; return '#333'; }
+        
+        function updateCredentials() { const u = document.getElementById('new-user-inp').value; const p = document.getElementById('new-password-inp').value; if(u){ db.username = u; if(p) db.password = p; saveDB(); showToast("Admin Updated!"); document.getElementById('new-password-inp').value = ""; } else showToast("Username needed!"); }
+        function checkScroll() { const s = document.getElementById('our-story'); if(!s.classList.contains('hidden')){ const r = s.getBoundingClientRect(); if(r.top < window.innerHeight && r.bottom >= 0) s.classList.add('animate-active'); } }
+        
+        function searchShop(keyword) {
+            keyword = keyword.toLowerCase();
+            const c = document.getElementById('shop-container'); c.innerHTML = ''; 
+            document.getElementById('our-story').classList.add('hidden');
+            let allItems = [...db.fashion.map(x=>({...x, cat:'fashion'})), ...db.uniform.map(x=>({...x, cat:'uniform'}))];
+            let filtered = allItems.filter(i => i.name.toLowerCase().includes(keyword));
+            if(filtered.length === 0) { c.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#999; margin-top:50px;">No products found.</p>'; return; }
+            renderGrid(filtered, c);
+        }
+
+        function filterShop(cat) { 
+            const c = document.getElementById('shop-container'); c.innerHTML = ''; const s = document.getElementById('our-story'); 
+            let l = [];
+            if(cat==='fashion'){ l = db.fashion.map(x=>({...x, cat:'fashion'})); s.classList.add('hidden');
+            } else if(cat==='uniform'){ l = db.uniform.map(x=>({...x, cat:'uniform'})); s.classList.add('hidden');
+            } else { l = [...db.fashion.map(x=>({...x, cat:'fashion'})), ...db.uniform.map(x=>({...x, cat:'uniform'}))]; s.classList.remove('hidden'); setTimeout(checkScroll,100); }
+            renderGrid(l, c);
+        }
+
+        function renderGrid(list, container) {
+            list.forEach(i => {
+                let badgeHtml = i.badge ? `<span class="badge badge-${i.badge.toLowerCase()}">${i.badge}</span>` : '';
+                container.innerHTML += `
+                <div class="product-card white-panel">
+                    ${badgeHtml}
+                    <div class="p-img-box" onclick="openLightbox('${i.img}')">
+                        <img src="${i.img}">
+                        <div class="hover-overlay"><div class="hover-icon"><i class="fas fa-eye"></i></div></div>
+                    </div>
+                    <h3>${i.name}</h3>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                        <span style="color:var(--primary); font-weight:800;">${i.price||i.type}</span>
+                        <button class="btn btn-green" onclick="addToCart(${i.id}, '${i.cat}')">ADD TO CART</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function addToCart(id, type) {
+            let list = db[type]; let item = list.find(x => x.id == id);
+            let existing = cart.find(x => x.id == id && x.category == type);
+            if(existing) existing.qty++; else cart.push({ ...item, category: type, qty: 1 });
+            updateCartUI(); toggleCart(true);
+            showToast("Added to Cart successfully! ✅");
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items'); container.innerHTML = '';
+            let total = 0, count = 0;
+            if(cart.length === 0) container.innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Your bag is empty.</p>';
+            cart.forEach((item, index) => {
+                let priceNum = parseFloat((item.price || '0').replace('$','')) || 0; 
+                total += priceNum * item.qty; count += item.qty;
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.img}">
+                        <div class="cart-info"><h4>${item.name}</h4><p>${item.price||item.type} x ${item.qty}</p></div>
+                        <div class="remove-btn" onclick="removeFromCart(${index})"><i class="fas fa-trash"></i></div>
+                    </div>`;
+            });
+            document.getElementById('cart-count').innerText = count; document.getElementById('cart-total').innerText = '$' + total.toFixed(2);
+        }
+
+        function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
+        function toggleCart(forceOpen = false) { const s = document.getElementById('cart-sidebar'); if(forceOpen) s.classList.add('open'); else s.classList.toggle('open'); }
+
+        function checkoutTelegram() {
+            if(cart.length === 0) return showToast("Please add items first!");
+            let msg = "🛒 *NEW ORDER* %0A------------------%0A"; let total = 0;
+            cart.forEach(i => { let p = parseFloat((i.price||'0').replace('$','')) || 0; total += p * i.qty; msg += `▪️ ${i.name} (x${i.qty}) - ${i.price||i.type} %0A`; });
+            msg += "------------------%0A"; msg += `💰 *TOTAL: $${total.toFixed(2)}*`;
+            window.open(`https://t.me/ReaksaAds?text=${msg}`, '_blank');
+        }
+
+        function scrollToStory() { filterShop('all'); setTimeout(() => document.getElementById('our-story').scrollIntoView({ behavior: 'smooth' }), 100); }
+        function saveStory() { db.story.title = document.getElementById('story-title-inp').value; db.story.desc = document.getElementById('story-desc-inp').value; db.story.img = document.getElementById('story-img-inp').value; saveDB(); showToast("Story Updated!"); }
+        function handleLogoUpload(i) { if(i.files[0]) { var r = new FileReader(); r.onload = function(e) { db.logo = e.target.result; saveDB(); showToast("Logo Updated!"); }; r.readAsDataURL(i.files[0]); }}
+        function openLightbox(s) { document.getElementById('lightbox-img').src = s; document.getElementById('lightbox').classList.remove('hidden'); }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        
+        function openModal(tab, id=null) { 
+            document.getElementById('modal-box').classList.remove('hidden'); document.getElementById('current-tab').value = tab; document.getElementById('edit-id').value = id; document.getElementById('edit-mode').value = id ? 'edit' : 'add'; document.getElementById('modal-title').innerText = (id?"EDIT ":"ADD ") + tab.toUpperCase(); 
+            if(id) { 
+                let i = db[tab].find(x => x.id === id); 
+                document.getElementById('modal-name').value = i.name; document.getElementById('modal-price').value = i.price||i.type; document.getElementById('modal-img').value = i.img; document.getElementById('modal-badge').value = i.badge || "";
+            } else { 
+                document.getElementById('modal-name').value = ''; document.getElementById('modal-price').value = ''; document.getElementById('modal-img').value = ''; document.getElementById('modal-badge').value = "";
+            }
+        }
+        
+        function saveItem() { 
+            let tab = document.getElementById('current-tab').value; let id = document.getElementById('edit-id').value; let mode = document.getElementById('edit-mode').value; 
+            let obj = { id: mode=='add'?Date.now():parseInt(id), name: document.getElementById('modal-name').value, img: document.getElementById('modal-img').value || 'https://via.placeholder.com/150', badge: document.getElementById('modal-badge').value }; 
+            obj[tab=='fashion'?'price':'type'] = document.getElementById('modal-price').value; 
+            if(mode=='add') db[tab].push(obj); else db[tab][db[tab].findIndex(x => x.id == id)] = obj; 
+            saveDB(); closeModal(); showToast("Item Saved!");
+        }
+        
+        function closeModal() { document.getElementById('modal-box').classList.add('hidden'); }
+        function switchView(id) { ['view-shop','view-login','view-admin'].forEach(v=>document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function doLogin() { if(document.getElementById('u').value === db.username && document.getElementById('p').value === db.password) { switchView('view-admin'); } else { showToast('Wrong Credentials!'); } }
+        function logout() { switchView('view-login'); }
+        function switchTab(t,el) { ['fashion','uniform','story','settings'].forEach(x=>document.getElementById('tab-'+x).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active')); el.classList.add('active'); document.getElementById('page-title').innerText = t.toUpperCase(); }
+    </script>
+</body>
+</html>
