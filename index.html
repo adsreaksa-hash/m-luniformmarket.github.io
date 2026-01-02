@@ -316,79 +316,124 @@
         </div>
     </div>
 
-    <script>
-        let db = {
-            fashion: JSON.parse(localStorage.getItem('ml_fashion')) || [{ id: 1, name: 'Cyber Jacket', price: '$45.00', img: 'https://cdn-icons-png.flaticon.com/512/2806/2806141.png', badge: 'HOT' }],
-            uniform: JSON.parse(localStorage.getItem('ml_uniform')) || [{ id: 101, name: 'Security Set', type: 'Full Body', img: 'https://cdn-icons-png.flaticon.com/512/2405/2405904.png', badge: 'NEW' }],
-            logo: localStorage.getItem('ml_logo') || 'https://cdn-icons-png.flaticon.com/512/732/732200.png',
-            story: JSON.parse(localStorage.getItem('ml_story')) || { title: "M&L UNIFORM STORY", desc: "ចាប់ផ្តើមពីហាងតូចមួយក្នុងឆ្នាំ ២០២០...", img: "https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg" },
-            username: localStorage.getItem('ml_username') || 'admin',
-            password: localStorage.getItem('ml_password') || '123'
+    <script type="module">
+        // Import Firebase Functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // ✅ YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDOy67iLPHpZNvWUqvzdXQHFBRpIQj0MA",
+            authDomain: "my-project-ml-market-uniform.firebaseapp.com",
+            projectId: "my-project-ml-market-uniform",
+            storageBucket: "my-project-ml-market-uniform.firebasestorage.app",
+            messagingSenderId: "585783972186",
+            appId: "1:585783972186:web:36d5d397967ebb5554e363",
+            // 🔥 ប្រសិនបើកូដនេះមិនដំណើរការ, សូមជំនួស Link ខាងក្រោមនេះជាមួយ Link ក្នុង Firebase -> Realtime Database របស់អ្នក
+            databaseURL: "https://my-project-ml-market-uniform-default-rtdb.firebaseio.com"
         };
-        let cart = [];
 
-        document.addEventListener('keydown', function(event) { if (event.key === "F9") switchView('view-login'); });
-        window.onload = () => { renderData(); checkScroll(); updateCartUI(); };
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-        function saveDB() {
-            localStorage.setItem('ml_fashion', JSON.stringify(db.fashion)); localStorage.setItem('ml_uniform', JSON.stringify(db.uniform));
-            localStorage.setItem('ml_logo', db.logo); localStorage.setItem('ml_story', JSON.stringify(db.story));
-            localStorage.setItem('ml_username', db.username); localStorage.setItem('ml_password', db.password);
-            renderData();
+        // Default Data (used only if cloud is empty)
+        let db = {
+            fashion: [{ id: 1, name: 'Cyber Jacket', price: '$45.00', img: 'https://cdn-icons-png.flaticon.com/512/2806/2806141.png', badge: 'HOT' }],
+            uniform: [{ id: 101, name: 'Security Set', type: 'Full Body', img: 'https://cdn-icons-png.flaticon.com/512/2405/2405904.png', badge: 'NEW' }],
+            logo: 'https://cdn-icons-png.flaticon.com/512/732/732200.png',
+            story: { title: "M&L UNIFORM STORY", desc: "ចាប់ផ្តើមពីហាងតូចមួយក្នុងឆ្នាំ ២០២០...", img: "https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg" },
+            username: 'admin',
+            password: '123'
+        };
+        
+        window.cart = [];
+
+        // 🔥 SYNC DATA FROM FIREBASE (REAL-TIME)
+        const dbRef = ref(database, 'shopData');
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                db = data; // Update local variable with Cloud data
+            } else {
+                saveToFirebase(); // Save default if empty
+            }
+            renderData(); // Update Screen
+        });
+
+        // 🔥 SAVE TO FIREBASE FUNCTION
+        window.saveDB = function() {
+            set(dbRef, db)
+            .then(() => showToast("Saved to Cloud! ☁️"))
+            .catch((error) => showToast("Error Saving: " + error));
         }
 
-        function renderData() {
-            document.getElementById('shop-logo').src = db.logo; document.getElementById('admin-logo-preview').src = db.logo;
-            document.getElementById('disp-story-title').innerText = db.story.title; document.getElementById('disp-story-desc').innerText = db.story.desc; document.getElementById('disp-story-img').src = db.story.img;
-            document.getElementById('story-title-inp').value = db.story.title; document.getElementById('story-desc-inp').value = db.story.desc; document.getElementById('story-img-inp').value = db.story.img;
+        function saveToFirebase() {
+            set(dbRef, db);
+        }
+
+        // --- ALL UI FUNCTIONS ---
+        
+        window.renderData = function() {
+            document.getElementById('shop-logo').src = db.logo; 
+            document.getElementById('admin-logo-preview').src = db.logo;
+            document.getElementById('disp-story-title').innerText = db.story.title; 
+            document.getElementById('disp-story-desc').innerText = db.story.desc; 
+            document.getElementById('disp-story-img').src = db.story.img;
+            document.getElementById('story-title-inp').value = db.story.title; 
+            document.getElementById('story-desc-inp').value = db.story.desc; 
+            document.getElementById('story-img-inp').value = db.story.img;
             document.getElementById('new-user-inp').value = db.username;
+
             const fBody = document.getElementById('fashion-table-body'); fBody.innerHTML = '';
-            db.fashion.forEach(i => fBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.price || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('fashion', ${i.id})">EDIT</button></td></tr>`);
+            if(db.fashion) db.fashion.forEach(i => fBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.price || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('fashion', ${i.id})">EDIT</button></td></tr>`);
+            
             const uBody = document.getElementById('uniform-table-body'); uBody.innerHTML = '';
-            db.uniform.forEach(i => uBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.type || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('uniform', ${i.id})">EDIT</button></td></tr>`);
-            filterShop('all', document.querySelector('.chip')); 
+            if(db.uniform) db.uniform.forEach(i => uBody.innerHTML += `<tr><td><img src="${i.img}" class="t-img"></td><td>${i.name}</td><td>${i.type || 'N/A'}</td><td><span style="font-size:10px; font-weight:700; color:${getBadgeColor(i.badge)}">${i.badge||'-'}</span></td><td><button class="btn btn-outline" style="padding:5px 10px; font-size:10px;" onclick="openModal('uniform', ${i.id})">EDIT</button></td></tr>`);
+            
+            // Re-apply filter
+            const activeChip = document.querySelector('.chip.active');
+            if(activeChip) {
+                // If a specific chip was active, try to keep it logic, else default
+                // For simplicity, we re-render current view or default
+            } else {
+                filterShop('all', null);
+            }
         }
 
-        function getBadgeColor(b) { if(b=='HOT') return 'var(--badge-hot)'; if(b=='NEW') return 'var(--badge-new)'; if(b=='SALE') return 'var(--badge-sale)'; return '#333'; }
+        window.getBadgeColor = function(b) { if(b=='HOT') return 'var(--badge-hot)'; if(b=='NEW') return 'var(--badge-new)'; if(b=='SALE') return 'var(--badge-sale)'; return '#333'; }
+        window.updateCredentials = function() { const u = document.getElementById('new-user-inp').value; const p = document.getElementById('new-password-inp').value; if(u){ db.username = u; if(p) db.password = p; window.saveDB(); showToast("Admin Updated!"); document.getElementById('new-password-inp').value = ""; } else showToast("Username needed!"); }
         
-        function updateCredentials() { const u = document.getElementById('new-user-inp').value; const p = document.getElementById('new-password-inp').value; if(u){ db.username = u; if(p) db.password = p; saveDB(); showToast("Admin Updated!"); document.getElementById('new-password-inp').value = ""; } else showToast("Username needed!"); }
-        
-        function checkScroll() { 
+        window.checkScroll = function() { 
             const shop = document.getElementById('view-shop');
             const s = document.getElementById('our-story'); 
             const btn = document.getElementById('scroll-top');
             if(shop.scrollTop > 300) btn.classList.add('show'); else btn.classList.remove('show');
-            if(!s.classList.contains('hidden')){ 
-                const r = s.getBoundingClientRect(); 
-                if(r.top < window.innerHeight && r.bottom >= 0) s.classList.add('animate-active'); 
-            } 
+            if(!s.classList.contains('hidden')){ const r = s.getBoundingClientRect(); if(r.top < window.innerHeight && r.bottom >= 0) s.classList.add('animate-active'); } 
         }
-        
-        function searchShop(keyword) {
+
+        window.searchShop = function(keyword) {
             keyword = keyword.toLowerCase();
             const c = document.getElementById('shop-container'); c.innerHTML = ''; 
             document.getElementById('our-story').classList.add('hidden');
-            let allItems = [...db.fashion.map(x=>({...x, cat:'fashion'})), ...db.uniform.map(x=>({...x, cat:'uniform'}))];
+            let allItems = [...(db.fashion||[]).map(x=>({...x, cat:'fashion'})), ...(db.uniform||[]).map(x=>({...x, cat:'uniform'}))];
             let filtered = allItems.filter(i => i.name.toLowerCase().includes(keyword) || (i.badge && i.badge.toLowerCase() === keyword));
             if(filtered.length === 0) { c.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#999; margin-top:50px;">No products found.</p>'; return; }
             renderGrid(filtered, c);
             document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
         }
 
-        function filterShop(cat, el) { 
+        window.filterShop = function(cat, el) { 
             const c = document.getElementById('shop-container'); c.innerHTML = ''; const s = document.getElementById('our-story'); 
             let l = [];
-            if(cat==='fashion'){ l = db.fashion.map(x=>({...x, cat:'fashion'})); s.classList.add('hidden');
-            } else if(cat==='uniform'){ l = db.uniform.map(x=>({...x, cat:'uniform'})); s.classList.add('hidden');
-            } else { l = [...db.fashion.map(x=>({...x, cat:'fashion'})), ...db.uniform.map(x=>({...x, cat:'uniform'}))]; s.classList.remove('hidden'); setTimeout(checkScroll,100); }
+            if(cat==='fashion'){ l = (db.fashion||[]).map(x=>({...x, cat:'fashion'})); s.classList.add('hidden');
+            } else if(cat==='uniform'){ l = (db.uniform||[]).map(x=>({...x, cat:'uniform'})); s.classList.add('hidden');
+            } else { l = [...(db.fashion||[]).map(x=>({...x, cat:'fashion'})), ...(db.uniform||[]).map(x=>({...x, cat:'uniform'}))]; s.classList.remove('hidden'); setTimeout(window.checkScroll,100); }
             renderGrid(l, c);
-            if(el) {
-                document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active'));
-                el.classList.add('active');
-            }
+            if(el) { document.querySelectorAll('.chip').forEach(ch => ch.classList.remove('active')); el.classList.add('active'); }
         }
 
-        function renderGrid(list, container) {
+        window.renderGrid = function(list, container) {
             list.forEach(i => {
                 let badgeHtml = i.badge ? `<span class="badge badge-${i.badge.toLowerCase()}">${i.badge}</span>` : '';
                 container.innerHTML += `
@@ -407,58 +452,50 @@
             });
         }
 
-        function addToCart(id, type) {
+        window.addToCart = function(id, type) {
             let list = db[type]; let item = list.find(x => x.id == id);
-            let existing = cart.find(x => x.id == id && x.category == type);
-            if(existing) existing.qty++; else cart.push({ ...item, category: type, qty: 1 });
-            updateCartUI(); toggleCart(true);
-            showToast("Added to Cart successfully! ✅");
+            let existing = window.cart.find(x => x.id == id && x.category == type);
+            if(existing) existing.qty++; else window.cart.push({ ...item, category: type, qty: 1 });
+            updateCartUI(); toggleCart(true); showToast("Added to Cart successfully! ✅");
         }
 
-        function showToast(msg) {
+        window.showToast = function(msg) {
             const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
+            const toast = document.createElement('div'); toast.className = 'toast';
             toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        function updateCartUI() {
+        window.updateCartUI = function() {
             const container = document.getElementById('cart-items'); container.innerHTML = '';
             let total = 0, count = 0;
-            if(cart.length === 0) container.innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Your bag is empty.</p>';
-            cart.forEach((item, index) => {
+            if(window.cart.length === 0) container.innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Your bag is empty.</p>';
+            window.cart.forEach((item, index) => {
                 let priceNum = parseFloat((item.price || '0').replace('$','')) || 0; 
                 total += priceNum * item.qty; count += item.qty;
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${item.img}">
-                        <div class="cart-info"><h4>${item.name}</h4><p>${item.price||item.type} x ${item.qty}</p></div>
-                        <div class="remove-btn" onclick="removeFromCart(${index})"><i class="fas fa-trash"></i></div>
-                    </div>`;
+                container.innerHTML += `<div class="cart-item"><img src="${item.img}"><div class="cart-info"><h4>${item.name}</h4><p>${item.price||item.type} x ${item.qty}</p></div><div class="remove-btn" onclick="removeFromCart(${index})"><i class="fas fa-trash"></i></div></div>`;
             });
             document.getElementById('cart-count').innerText = count; document.getElementById('cart-total').innerText = '$' + total.toFixed(2);
         }
 
-        function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
-        function toggleCart(forceOpen = false) { const s = document.getElementById('cart-sidebar'); if(forceOpen) s.classList.add('open'); else s.classList.toggle('open'); }
-
-        function checkoutTelegram() {
-            if(cart.length === 0) return showToast("Please add items first!");
+        window.removeFromCart = function(i) { window.cart.splice(i, 1); updateCartUI(); }
+        window.toggleCart = function(forceOpen = false) { const s = document.getElementById('cart-sidebar'); if(forceOpen) s.classList.add('open'); else s.classList.toggle('open'); }
+        window.checkoutTelegram = function() {
+            if(window.cart.length === 0) return showToast("Please add items first!");
             let msg = "🛒 *NEW ORDER* %0A------------------%0A"; let total = 0;
-            cart.forEach(i => { let p = parseFloat((i.price||'0').replace('$','')) || 0; total += p * i.qty; msg += `▪️ ${i.name} (x${i.qty}) - ${i.price||i.type} %0A`; });
+            window.cart.forEach(i => { let p = parseFloat((i.price||'0').replace('$','')) || 0; total += p * i.qty; msg += `▪️ ${i.name} (x${i.qty}) - ${i.price||i.type} %0A`; });
             msg += "------------------%0A"; msg += `💰 *TOTAL: $${total.toFixed(2)}*`;
             window.open(`https://t.me/ReaksaAds?text=${msg}`, '_blank');
         }
 
-        function scrollToStory() { filterShop('all', null); setTimeout(() => document.getElementById('our-story').scrollIntoView({ behavior: 'smooth' }), 100); }
-        function saveStory() { db.story.title = document.getElementById('story-title-inp').value; db.story.desc = document.getElementById('story-desc-inp').value; db.story.img = document.getElementById('story-img-inp').value; saveDB(); showToast("Story Updated!"); }
-        function handleLogoUpload(i) { if(i.files[0]) { var r = new FileReader(); r.onload = function(e) { db.logo = e.target.result; saveDB(); showToast("Logo Updated!"); }; r.readAsDataURL(i.files[0]); }}
-        function openLightbox(s) { document.getElementById('lightbox-img').src = s; document.getElementById('lightbox').classList.remove('hidden'); }
-        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        window.scrollToStory = function() { filterShop('all', null); setTimeout(() => document.getElementById('our-story').scrollIntoView({ behavior: 'smooth' }), 100); }
+        window.saveStory = function() { db.story.title = document.getElementById('story-title-inp').value; db.story.desc = document.getElementById('story-desc-inp').value; db.story.img = document.getElementById('story-img-inp').value; window.saveDB(); showToast("Story Updated!"); }
+        window.handleLogoUpload = function(i) { if(i.files[0]) { var r = new FileReader(); r.onload = function(e) { db.logo = e.target.result; window.saveDB(); showToast("Logo Updated!"); }; r.readAsDataURL(i.files[0]); }}
+        window.openLightbox = function(s) { document.getElementById('lightbox-img').src = s; document.getElementById('lightbox').classList.remove('hidden'); }
+        window.closeLightbox = function() { document.getElementById('lightbox').classList.add('hidden'); }
         
-        function openModal(tab, id=null) { 
+        window.openModal = function(tab, id=null) { 
             document.getElementById('modal-box').classList.remove('hidden'); document.getElementById('current-tab').value = tab; document.getElementById('edit-id').value = id; document.getElementById('edit-mode').value = id ? 'edit' : 'add'; document.getElementById('modal-title').innerText = (id?"EDIT ":"ADD ") + tab.toUpperCase(); 
             if(id) { 
                 let i = db[tab].find(x => x.id === id); 
@@ -468,19 +505,26 @@
             }
         }
         
-        function saveItem() { 
+        window.saveItem = function() { 
             let tab = document.getElementById('current-tab').value; let id = document.getElementById('edit-id').value; let mode = document.getElementById('edit-mode').value; 
             let obj = { id: mode=='add'?Date.now():parseInt(id), name: document.getElementById('modal-name').value, img: document.getElementById('modal-img').value || 'https://via.placeholder.com/150', badge: document.getElementById('modal-badge').value }; 
             obj[tab=='fashion'?'price':'type'] = document.getElementById('modal-price').value; 
+            if(!db[tab]) db[tab] = []; 
             if(mode=='add') db[tab].push(obj); else db[tab][db[tab].findIndex(x => x.id == id)] = obj; 
-            saveDB(); closeModal(); showToast("Item Saved!");
+            window.saveDB(); closeModal(); showToast("Item Saved!");
         }
         
-        function closeModal() { document.getElementById('modal-box').classList.add('hidden'); }
-        function switchView(id) { ['view-shop','view-login','view-admin'].forEach(v=>document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-        function doLogin() { if(document.getElementById('u').value === db.username && document.getElementById('p').value === db.password) { switchView('view-admin'); } else { showToast('Wrong Credentials!'); } }
-        function logout() { switchView('view-login'); }
-        function switchTab(t,el) { ['fashion','uniform','story','settings'].forEach(x=>document.getElementById('tab-'+x).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active')); el.classList.add('active'); document.getElementById('page-title').innerText = t.toUpperCase(); }
+        window.closeModal = function() { document.getElementById('modal-box').classList.add('hidden'); }
+        window.switchView = function(id) { ['view-shop','view-login','view-admin'].forEach(v=>document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        window.doLogin = function() { if(document.getElementById('u').value === db.username && document.getElementById('p').value === db.password) { switchView('view-admin'); } else { showToast('Wrong Credentials!'); } }
+        window.logout = function() { switchView('view-login'); }
+        window.switchTab = function(t,el) { ['fashion','uniform','story','settings'].forEach(x=>document.getElementById('tab-'+x).classList.add('hidden')); document.getElementById('tab-'+t).classList.remove('hidden'); document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active')); el.classList.add('active'); document.getElementById('page-title').innerText = t.toUpperCase(); }
+
+        // Trigger initial load
+        filterShop('all', document.querySelector('.chip'));
+
+        document.addEventListener('keydown', function(event) { if (event.key === "F9") window.switchView('view-login'); });
+
     </script>
 </body>
 </html>
